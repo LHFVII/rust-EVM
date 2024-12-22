@@ -1,4 +1,4 @@
-use super::stack::Stack;
+use super::{memory::Memory, stack::Stack};
 use clap::{command,Parser, Subcommand};
 
 #[derive(Parser)]
@@ -10,15 +10,16 @@ struct Args {
 
 #[derive(Subcommand, Debug, Clone)]
 enum Commands {
-    CreateStack,
+    StartNode,
 }
 pub struct CLI {
     pub stack: Option<Stack<i32>>,
+    pub memory: Option<Memory>
 }
 
 impl CLI{
     pub fn new() -> Self{
-        return CLI{stack: None};
+        return CLI{stack: None, memory: None};
         
     }
 
@@ -33,7 +34,7 @@ impl CLI{
             match Args::try_parse_from(args) {
                 Ok(cli) => {
                     match cli.cmd {
-                        Commands::CreateStack => self.create_stack(),
+                        Commands::StartNode => self.start_node(),
                         
                     }
                 }
@@ -43,14 +44,20 @@ impl CLI{
     }
     fn show_commands(&self) {
         println!(r#"COMMANDS:
-    1) create-stack - It creates the EVM stack
+    1) start-node - It creates the EVM stack
     "#);
     }
 
-    fn create_stack(&mut self){
+    fn start_node(&mut self){
         if !self.stack.is_none(){
             eprintln!("Stack already exists");
+            return;
         }
-        self.stack = Some(Stack::<i32>::new())
+        self.stack = Some(Stack::<i32>::new());
+        if !self.memory.is_none(){
+            eprintln!("Memory already exists");
+            return;
+        }
+        self.memory = Some(Memory::new());
     }
 }
