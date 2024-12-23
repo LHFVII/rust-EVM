@@ -1,15 +1,15 @@
 pub struct Memory {
-    storage: Vec<Vec<u8>>,
+    cells: Vec<Vec<u8>>,
 }
 
 impl Memory{
     pub fn new()-> Self{
         Memory{
-            storage: vec![]
+            cells: vec![]
         }
     }
     pub fn access(&self,offset: usize, size: usize)-> &[u8]{
-        let slice = &self.storage[offset][0..size];
+        let slice = &self.cells[offset][0..size];
         return slice;
     }
     pub fn load(&self, offset: usize)-> &[u8]{
@@ -21,16 +21,22 @@ impl Memory{
             value.push(0);
             current_length = current_length + 1;
         }
-        if offset+1 <= self.storage.len(){
-            self.storage[offset] = value;
+        if offset+1 <= self.cells.len(){
+            self.cells[offset] = value;
             return;
         }
-        else if offset == self.storage.len(){
-            self.storage.push(value);
+        else if offset == self.cells.len(){
+            self.cells.push(value);
             return;
         }
         eprintln!("memory overflow");
     }
+    pub fn calc_memory_expansion_gas(memory_byte_size:usize) -> usize{
+        let memory_size_word = (memory_byte_size + 31) / 32;
+        let memory_cost = (memory_size_word.pow(2) ) / 512 + (3 * memory_size_word);
+        return memory_cost;
+    }
+    
     
 }
 
