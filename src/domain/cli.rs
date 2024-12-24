@@ -1,4 +1,4 @@
-use super::{memory::Memory, stack::Stack};
+use super::evm::EVM;
 use clap::{command,Parser, Subcommand};
 
 #[derive(Parser)]
@@ -11,15 +11,23 @@ struct Args {
 #[derive(Subcommand, Debug, Clone)]
 enum Commands {
     StartNode,
+    ResetNode,
+    RunInstructions,
+    AddInstruction{
+        instruction: u8
+    },
+    SetInstructionGas{
+        gas: u32
+    },
+    ResetInstructions,
 }
-pub struct CLI {
-    pub stack: Option<Stack<i32>>,
-    pub memory: Option<Memory>
+pub struct CLI<'a,'b,'c> {
+    pub node: Option<EVM<'a,'b, 'c>>
 }
 
-impl CLI{
+impl<'a, 'b, 'c> CLI<'a, 'b, 'c>{
     pub fn new() -> Self{
-        return CLI{stack: None, memory: None};
+        return CLI{node: None};
         
     }
 
@@ -35,29 +43,37 @@ impl CLI{
                 Ok(cli) => {
                     match cli.cmd {
                         Commands::StartNode => self.start_node(),
-                        
+                        Commands::AddInstruction { instruction } => self.add_instruction(instruction),
+                        Commands::ResetNode => self.start_node(),
+                        Commands::ResetInstructions => self.start_node(),
+                        Commands::RunInstructions => self.start_node(),
+                        Commands::SetInstructionGas { gas } => self.start_node(),
                     }
                 }
                 Err(e) => println!("That's not a valid command! Error: {}", e),
             };
         }
     }
-    fn show_commands(&self) {
+    fn show_commands(&mut self) {
         println!(r#"COMMANDS:
-    1) start-node - It creates the EVM stack
+    1) Start node - Start the EVM runtime
+    2) Add instructions -ins add an opcode to the bytecode
+    3) Reset instructions - resets added opcodes
+    4) Set gas -gas - gas used by the bytecode
+    5) Run instructions - 
+    6) Reset node
     "#);
     }
 
     fn start_node(&mut self){
-        if !self.stack.is_none(){
-            eprintln!("Stack already exists");
+        self.node = Some(EVM::new(Vec::new(), 0, 0, vec![]));
+    }
+    fn add_instruction(&mut self, instruction: u8){
+        if self.node.is_none(){
+            eprintln!("Node is not started");
             return;
         }
-        self.stack = Some(Stack::<i32>::new());
-        if !self.memory.is_none(){
-            eprintln!("Memory already exists");
-            return;
-        }
-        self.memory = Some(Memory::new());
+        let evm = self.node.as_mut().unwrap();
+        evm.add_op_code(instruction);
     }
 }

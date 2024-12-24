@@ -1,11 +1,11 @@
 use super::{memory::Memory, stack::Stack, storage::Storage};
 
-pub struct EVM<'a,'b>{
-    pc: usize,
+pub struct EVM<'a,'b, 'c>{
+    pc: &'c usize,
     stack: Stack<u32>,
     memory: Memory,
     storage: Storage<'a,'b>,
-    program: Vec<u32>,
+    program: Vec<u8>,
     gas: u32,
     calldata: Vec<u32>,
     value: u32,
@@ -15,10 +15,10 @@ pub struct EVM<'a,'b>{
     return_logs: Vec<u8>
 }
 
-impl<'a,'b> EVM<'a,'b>{
-    pub fn new(program: Vec<u32>, gas: u32,value: u32, calldata: Vec<u32>)-> Self{
+impl<'a,'b, 'c> EVM<'a,'b, 'c>{
+    pub fn new(program: Vec<u8>, gas: u32,value: u32, calldata: Vec<u32>)-> Self{
         EVM{
-            pc: 0,
+            pc: &0,
             stack: Stack::new(),
             memory: Memory::new(),
             storage: Storage::new(),
@@ -34,7 +34,7 @@ impl<'a,'b> EVM<'a,'b>{
 
     }
     pub fn peek(self){
-        self.program[self.pc];
+        self.program[*self.pc];
     }
 
     pub fn gas_dec(mut self, amount: u32){
@@ -46,8 +46,8 @@ impl<'a,'b> EVM<'a,'b>{
         self.gas = self.gas - amount;
     }
 
-    pub fn can_execute_next_op_code(self) -> bool{
-        if self.pc > self.program.len() - 1{
+    pub fn can_execute_next_op_code(&self) -> bool{
+        if *self.pc > self.program.len() - 1{
             return false;
         }
         if self.stop_flag{
@@ -60,14 +60,21 @@ impl<'a,'b> EVM<'a,'b>{
     }
     
     pub fn run(self){
-        println!("Running...")
+        println!("Running...");
+        while self.can_execute_next_op_code(){
+            let op = self.program[*self.pc];
+            println!("Operand is: {:?}:", op);
+        }
     }
     
     pub fn reset(mut self){
-        self.pc = 0;
+        self.pc = &0;
         self.stack = Stack::new();
         self.memory = Memory::new();
         self.storage = Storage::new();
+    }
 
+    pub fn add_op_code(&mut self, opcode: u8){
+        self.program.push(opcode);
     }
 }
