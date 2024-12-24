@@ -58,7 +58,16 @@ impl<'a,'b> EVM<'a,'b>{
         }
         return true;
     }
+    
     pub fn run(self){
         println!("Running...")
+    }
+    
+    pub fn reset(mut self){
+        self.pc = 0;
+        self.stack = Stack::new();
+        self.memory = Memory::new();
+        self.storage = Storage::new();
+
     }
 }
