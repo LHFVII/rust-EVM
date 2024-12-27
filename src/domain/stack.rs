@@ -4,7 +4,7 @@ const MAXIMUM_STACK_SIZE: i32 = 1024;
 
 pub struct Stack<T> {
     head: Link<T>,
-    length: i32
+    length: i32,
 }
 
 struct Node<T> {
@@ -14,12 +14,15 @@ struct Node<T> {
 
 impl<T> Stack<T> {
     pub fn new() -> Self {
-        Stack { head: None, length: 0 }
+        Stack {
+            head: None,
+            length: 0,
+        }
     }
 
     pub fn push(&mut self, elem: T) -> Result<(), &str> {
-        if self.length == MAXIMUM_STACK_SIZE-1{
-            return Err("Stack overflow")
+        if self.length == MAXIMUM_STACK_SIZE - 1 {
+            return Err("Stack overflow");
         }
         let new_node = Box::new(Node {
             elem: elem,
@@ -33,7 +36,7 @@ impl<T> Stack<T> {
 
     pub fn pop(&mut self) -> Result<Option<T>, &str> {
         if self.length - 1 == -1 {
-            return Err("Stack overflow")
+            return Err("Stack overflow");
         }
         self.length = self.length - 1;
         Ok(self.head.take().map(|node| {
@@ -43,15 +46,11 @@ impl<T> Stack<T> {
     }
 
     pub fn peek(&self) -> Option<&T> {
-        self.head.as_ref().map(|node| {
-            &node.elem
-        })
+        self.head.as_ref().map(|node| &node.elem)
     }
 
     pub fn peek_mut(&mut self) -> Option<&mut T> {
-        self.head.as_mut().map(|node| {
-            &mut node.elem
-        })
+        self.head.as_mut().map(|node| &mut node.elem)
     }
 
     pub fn into_iter(self) -> IntoIter<T> {
@@ -59,11 +58,15 @@ impl<T> Stack<T> {
     }
 
     pub fn iter(&self) -> Iter<'_, T> {
-        Iter { next: self.head.as_deref() }
+        Iter {
+            next: self.head.as_deref(),
+        }
     }
 
     pub fn iter_mut(&mut self) -> IterMut<'_, T> {
-        IterMut { next: self.head.as_deref_mut() }
+        IterMut {
+            next: self.head.as_deref_mut(),
+        }
     }
 }
 
