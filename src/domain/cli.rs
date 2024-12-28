@@ -41,8 +41,8 @@ impl<'a, 'b, 'c> CLI<'a, 'b, 'c> {
                     Commands::StartNode => self.start_node(),
                     Commands::AddInstruction { instruction } => self.add_instruction(instruction),
                     Commands::ResetNode => self.start_node(),
-                    Commands::ResetInstructions => self.start_node(),
-                    Commands::RunInstructions => self.start_node(),
+                    Commands::ResetInstructions => self.reset_instructions(),
+                    Commands::RunInstructions => self.run_instructions(),
                     Commands::SetInstructionGas { gas } => self.set_gas(gas),
                 },
                 Err(e) => println!("That's not a valid command! Error: {}", e),
@@ -77,9 +77,10 @@ impl<'a, 'b, 'c> CLI<'a, 'b, 'c> {
             return;
         }
         let evm = self.node.as_mut().unwrap();
-        let bytes = instruction.parse::<u8>().unwrap();
-        println!("{:?}", bytes)
-        //evm.add_op_code(bytes);
+        let bytes = u8::from_str_radix(&instruction.trim_start_matches("0x"), 16)
+            .expect("Failed to parse hex");
+        println!("{:?}", bytes);
+        evm.add_op_code(bytes);
     }
 
     fn set_gas(&mut self, gas: u32) {
@@ -89,5 +90,23 @@ impl<'a, 'b, 'c> CLI<'a, 'b, 'c> {
         }
         let evm = self.node.as_mut().unwrap();
         evm.set_gas_for_instruction(gas);
+    }
+
+    fn reset_instructions(&mut self) {
+        if self.node.is_none() {
+            eprintln!("Node is not started");
+            return;
+        }
+        let evm = self.node.as_mut().unwrap();
+        evm.reset();
+    }
+
+    fn run_instructions(&mut self) {
+        if self.node.is_none() {
+            eprintln!("Node is not started");
+            return;
+        }
+        let evm = self.node.as_mut().unwrap();
+        evm.run();
     }
 }

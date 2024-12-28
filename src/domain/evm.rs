@@ -57,7 +57,7 @@ impl<'a, 'b, 'c> EVM<'a, 'b, 'c> {
         return true;
     }
 
-    pub fn run(self) {
+    pub fn run(&mut self) {
         println!("Running...");
         while self.can_execute_next_op_code() {
             let op = self.program[*self.pc];
@@ -65,7 +65,7 @@ impl<'a, 'b, 'c> EVM<'a, 'b, 'c> {
         }
     }
 
-    pub fn reset(mut self) {
+    pub fn reset(&mut self) {
         self.pc = &0;
         self.stack = Stack::new();
         self.memory = Memory::new();
