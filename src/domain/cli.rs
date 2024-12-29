@@ -12,10 +12,11 @@ struct Args {
 enum Commands {
     StartNode,
     ResetNode,
-    RunInstructions,
+    Run,
     AddInstruction { instruction: String },
-    SetInstructionGas { gas: u32 },
+    SetGas { gas: u32 },
     ResetInstructions,
+    PrintStack,
 }
 pub struct CLI<'a, 'b> {
     pub node: Option<EVM<'a, 'b>>,
@@ -42,8 +43,9 @@ impl<'a, 'b> CLI<'a, 'b> {
                     Commands::AddInstruction { instruction } => self.add_instruction(instruction),
                     Commands::ResetNode => self.start_node(),
                     Commands::ResetInstructions => self.reset_instructions(),
-                    Commands::RunInstructions => self.run_instructions(),
-                    Commands::SetInstructionGas { gas } => self.set_gas(gas),
+                    Commands::Run => self.run_instructions(),
+                    Commands::SetGas { gas } => self.set_gas(gas),
+                    Commands::PrintStack => self.print_stack(),
                 },
                 Err(e) => println!("That's not a valid command! Error: {}", e),
             };
@@ -52,12 +54,13 @@ impl<'a, 'b> CLI<'a, 'b> {
     fn show_commands(&mut self) {
         println!(
             r#"COMMANDS:
-    1) Start node - Start the EVM runtime.
-    2) Add instruction -ins add an opcode to the bytecode.
-    3) Reset instructions - resets added opcodes.
-    4) Set gas -gas - gas used by the bytecode.
-    5) Run instructions - it runs the bytecode.
-    6) Reset node
+    1) start-node -> Start the EVM runtime.
+    2) add-instruction ins -> Add an opcode to the bytecode.
+    3) reset-instructions -> Resets added opcodes.
+    4) set-gas -gas -> gas used by the bytecode.
+    5) run -> it runs the bytecode.
+    6) reset-node -> Restarts EVM.
+    7) print-stack -> Prints EVM stack values.
     "#
         );
     }
@@ -108,5 +111,13 @@ impl<'a, 'b> CLI<'a, 'b> {
         }
         let evm = self.node.as_mut().unwrap();
         evm.run();
+    }
+
+    fn print_stack(&mut self) {
+        if self.node.is_none() {
+            eprintln!("Node is not started");
+            return;
+        }
+        self.node.as_ref().unwrap().println_stack();
     }
 }

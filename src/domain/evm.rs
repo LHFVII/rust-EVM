@@ -66,15 +66,14 @@ impl<'a, 'b> EVM<'a, 'b> {
 
     pub fn run(&mut self) {
         println!("Running...");
-        if !self.is_gas_enough() {
+        /*if !self.is_gas_enough() {
             eprintln!("Not enough gas");
             return;
-        }
+        } */
         while self.can_execute_next_op_code() {
             let op = self.program[self.pc];
             self.execute_opcode(op);
         }
-        self.reset();
     }
 
     pub fn reset(&mut self) {
@@ -101,11 +100,18 @@ impl<'a, 'b> EVM<'a, 'b> {
         return self.gas >= expected_cost;
     }
 
+    pub fn println_stack(&self) {
+        println!("Printing stack...");
+        for i in self.stack.iter() {
+            println!("{:?}", *i);
+        }
+    }
+
     fn execute_opcode(&mut self, opcode: u8) {
         if opcode == 1 {
             return self.add();
         }
-        if opcode == 96{
+        if opcode == 96 {
             return self.push_one();
         }
     }
