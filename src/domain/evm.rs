@@ -8,18 +8,18 @@ pub struct EVM<'a, 'b> {
     memory: Memory,
     storage: Storage<'a, 'b>,
     program: Vec<u8>,
-    gas: u32,
-    calldata: Vec<u8>,
-    value: u32,
+    gas: i32,
     stop_flag: bool,
     revert_flag: bool,
+    gas_cost: HashMap<u8, i32>,
+    calldata: Vec<u8>,
+    value: u32,
     return_data: Vec<u8>,
     return_logs: Vec<u8>,
-    gas_cost: HashMap<u8, u32>,
 }
 
 impl<'a, 'b> EVM<'a, 'b> {
-    pub fn new(program: Vec<u8>, gas: u32, value: u32, calldata: Vec<u8>) -> Self {
+    pub fn new(program: Vec<u8>, gas: i32, value: u32, calldata: Vec<u8>) -> Self {
         EVM {
             pc: 0,
             stack: Stack::new(),
@@ -40,8 +40,8 @@ impl<'a, 'b> EVM<'a, 'b> {
         return self.program[self.pc];
     }
 
-    pub fn gas_dec(&mut self, amount: u32) {
-        if self.gas - amount < 0 {
+    pub fn gas_dec(&mut self, amount: i32) {
+        if (self.gas - amount) < 0 {
             eprintln!("Out of gas");
             return;
         }
@@ -87,7 +87,7 @@ impl<'a, 'b> EVM<'a, 'b> {
         self.program.push(opcode);
     }
 
-    pub fn set_gas_for_instruction(&mut self, gas: u32) {
+    pub fn set_gas_for_instruction(&mut self, gas: i32) {
         self.gas = gas;
     }
 
@@ -119,7 +119,7 @@ impl<'a, 'b> EVM<'a, 'b> {
     fn add(&mut self) {
         let a = self.stack.pop().unwrap().unwrap();
         let b = self.stack.pop().unwrap().unwrap();
-        self.stack.push(a + b);
+        let _ = self.stack.push(a + b);
         self.pc += 1;
         self.gas_dec(3);
     }
@@ -129,6 +129,6 @@ impl<'a, 'b> EVM<'a, 'b> {
         self.gas_dec(3);
         let value = self.peek();
         self.pc += 1;
-        self.stack.push(value);
+        let _ = self.stack.push(value);
     }
 }

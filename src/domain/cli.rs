@@ -14,7 +14,7 @@ enum Commands {
     ResetNode,
     Run,
     AddInstruction { instruction: String },
-    SetGas { gas: u32 },
+    SetGas { gas: i32 },
     ResetInstructions,
     PrintStack,
     AddIxsBatch,
@@ -89,7 +89,7 @@ impl<'a, 'b> CLI<'a, 'b> {
         evm.add_op_code(bytes);
     }
 
-    fn set_gas(&mut self, gas: u32) {
+    fn set_gas(&mut self, gas: i32) {
         if self.node.is_none() {
             eprintln!("Node is not started");
             return;
