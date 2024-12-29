@@ -1,6 +1,5 @@
-use std::collections::HashMap;
-
 use super::{memory::Memory, stack::Stack, storage::Storage};
+use std::collections::HashMap;
 
 pub struct EVM<'a, 'b> {
     pc: usize,
@@ -25,15 +24,15 @@ impl<'a, 'b> EVM<'a, 'b> {
             stack: Stack::new(),
             memory: Memory::new(),
             storage: Storage::new(),
-            program: program,
-            gas: gas,
-            calldata: calldata,
-            value: value,
             stop_flag: false,
             revert_flag: false,
             return_data: Vec::new(),
             return_logs: Vec::new(),
-            gas_cost: HashMap::from([(1, 3), (2, 4), (3, 5)]),
+            gas_cost: HashMap::from([(0, 0), (1, 3), (2, 4), (3, 5), (4, 4), (5, 5)]),
+            program: program,
+            gas: gas,
+            calldata: calldata,
+            value: value,
         }
     }
     pub fn peek(&mut self) -> u8 {
@@ -108,12 +107,28 @@ impl<'a, 'b> EVM<'a, 'b> {
     }
 
     fn execute_opcode(&mut self, opcode: u8) {
+        if opcode == 0 {
+            return self.stop();
+        }
         if opcode == 1 {
             return self.add();
+        }
+        if opcode == 2 {
+            return self.mul();
+        }
+        if opcode == 3 {
+            return self.sub();
+        }
+        if opcode == 4 {
+            return self.div();
         }
         if opcode == 96 {
             return self.push_one();
         }
+    }
+
+    fn stop(&mut self) {
+        self.stop_flag = true;
     }
 
     fn add(&mut self) {
@@ -122,6 +137,36 @@ impl<'a, 'b> EVM<'a, 'b> {
         let _ = self.stack.push(a + b);
         self.pc += 1;
         self.gas_dec(3);
+    }
+
+    fn mul(&mut self) {
+        let a = self.stack.pop().unwrap().unwrap();
+        let b = self.stack.pop().unwrap().unwrap();
+        let _ = self.stack.push(a * b);
+        self.pc += 1;
+        self.gas_dec(5);
+    }
+
+    fn sub(&mut self) {
+        let a = self.stack.pop().unwrap().unwrap();
+        let b = self.stack.pop().unwrap().unwrap();
+        let _ = self.stack.push(a - b);
+        self.pc += 1;
+        self.gas_dec(3);
+    }
+
+    fn div(&mut self) {
+        let a = self.stack.pop().unwrap().unwrap();
+        let b = self.stack.pop().unwrap().unwrap();
+        let mut result = 0;
+        if b == 0 {
+            result = 0;
+        } else {
+            result = a / b;
+        }
+        let _ = self.stack.push(result);
+        self.pc += 1;
+        self.gas_dec(5);
     }
 
     fn push_one(&mut self) {
