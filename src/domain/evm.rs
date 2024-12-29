@@ -62,13 +62,20 @@ impl<'a, 'b> EVM<'a, 'b> {
         }
         return true;
     }
+    pub fn run_safe(&mut self) {
+        println!("Running...");
+        if !self.is_gas_enough() {
+            eprintln!("Not enough gas");
+            return;
+        }
+        while self.can_execute_next_op_code() {
+            let op = self.program[self.pc];
+            self.execute_opcode(op);
+        }
+    }
 
     pub fn run(&mut self) {
         println!("Running...");
-        /*if !self.is_gas_enough() {
-            eprintln!("Not enough gas");
-            return;
-        } */
         while self.can_execute_next_op_code() {
             let op = self.program[self.pc];
             self.execute_opcode(op);
