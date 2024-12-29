@@ -17,11 +17,11 @@ enum Commands {
     SetInstructionGas { gas: u32 },
     ResetInstructions,
 }
-pub struct CLI<'a, 'b, 'c> {
-    pub node: Option<EVM<'a, 'b, 'c>>,
+pub struct CLI<'a, 'b> {
+    pub node: Option<EVM<'a, 'b>>,
 }
 
-impl<'a, 'b, 'c> CLI<'a, 'b, 'c> {
+impl<'a, 'b> CLI<'a, 'b> {
     pub fn new() -> Self {
         return CLI { node: None };
     }
