@@ -17,6 +17,7 @@ enum Commands {
     SetGas { gas: u32 },
     ResetInstructions,
     PrintStack,
+    AddIxsBatch,
 }
 pub struct CLI<'a, 'b> {
     pub node: Option<EVM<'a, 'b>>,
@@ -46,6 +47,7 @@ impl<'a, 'b> CLI<'a, 'b> {
                     Commands::Run => self.run_instructions(),
                     Commands::SetGas { gas } => self.set_gas(gas),
                     Commands::PrintStack => self.print_stack(),
+                    Commands::AddIxsBatch => self.print_stack(),
                 },
                 Err(e) => println!("That's not a valid command! Error: {}", e),
             };
@@ -56,11 +58,12 @@ impl<'a, 'b> CLI<'a, 'b> {
             r#"COMMANDS:
     1) start-node -> Start the EVM runtime.
     2) add-instruction ins -> Add an opcode to the bytecode.
-    3) reset-instructions -> Resets added opcodes.
-    4) set-gas -gas -> gas used by the bytecode.
-    5) run -> it runs the bytecode.
-    6) reset-node -> Restarts EVM.
-    7) print-stack -> Prints EVM stack values.
+    3) add-ixs-batch ins -> Add an opcode to the bytecode.
+    4) reset-instructions -> Resets added opcodes.
+    5) set-gas -gas -> Set the gas used by the bytecode.
+    6) run -> EVM runs the program bytecode.
+    7) reset-node -> Restarts EVM.
+    8) print-stack -> Prints EVM stack values.
     "#
         );
     }
